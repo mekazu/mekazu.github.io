@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safari Credit Card Autofill Test</title>
+</head>
+<body>
+    <h2>Test Safari Credit Card Autofill</h2>
+    <form action="#" method="post">
+        <label for="cc-number">Credit Card Number:</label>
+        <input type="text" id="cc-number" name="cc-number" autocomplete="cc-number" placeholder="XXXX XXXX XXXX XXXX" required>
+        <br><br>
+        
+        <label for="cc-exp">Expiration Date:</label>
+        <input type="text" id="cc-exp" name="cc-exp" autocomplete="cc-exp" placeholder="MM/YY" required>
+        <br><br>
+        
+        <label for="cc-csc">CVV:</label>
+        <input type="text" id="cc-csc" name="cc-csc" autocomplete="cc-csc" placeholder="XXX" required>
+        <br><br>
+        
+        <button type="submit">Submit</button>
+    </form>
+
+    <p><strong>Note:</strong> Safari will only enable credit card autofill on an <strong>HTTPS</strong> page.</p>
+</body>
+</html>
