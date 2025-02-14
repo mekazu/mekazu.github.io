@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Text Storage</title>
+    <script type="module">
+        // Firebase setup
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZ4-qM-uTYZqXwsqYGv7x7KJpQ-KyU0b0",
+            // authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "clip-e80f9",
+            // storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            // messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "clip-e80f9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function getKey() {
+            let key = localStorage.getItem("storageKey");
+            if (!key) {
+                key = prompt("Choose a key to store your text:", "");
+                if (key) {
+                    localStorage.setItem("storageKey", key);
+                }
+            }
+            return key;
+        }
+
+        async function loadText() {
+            const key = getKey();
+            if (!key) return;
+            const docRef = doc(db, "texts", key);
+            const docSnap = await getDoc(docRef);
+            document.getElementById("text-area").value = docSnap.exists() ? docSnap.data().content : "";
+        }
+
+        async function saveText() {
+            const key = getKey();
+            if (!key) return;
+            const content = document.getElementById("text-area").value;
+            await setDoc(doc(db, "texts", key), { content });
+            alert("Text saved!");
+        }
+
+        function copyText() {
+            const textArea = document.getElementById("text-area");
+            textArea.select();
+            navigator.clipboard.writeText(textArea.value).then(() => {
+                alert("Text copied!");
+            });
+        }
+
+        function pasteText() {
+            navigator.clipboard.readText().then(text => {
+                document.getElementById("text-area").value = text;
+                saveText();
+            });
+        }
+
+        window.onload = loadText;
+    </script>
+</head>
+<body>
+    <h2>Firebase Text Storage</h2>
+    <textarea id="text-area" placeholder="Type something..."></textarea>
+    <br>
+    <button onclick="saveText()">Save</button>
+    <button onclick="copyText()">Copy All</button>
+    <button onclick="pasteText()">Paste & Save</button>
+    <p>Your text is stored under your chosen key.</p>
+</body>
+</html>
