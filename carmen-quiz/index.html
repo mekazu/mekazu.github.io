@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carmen Chorus Quiz</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #1a0a0a;
+      color: #f0e6e0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #8b1a1a;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      color: #e8a0a0;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+    }
+
+    header p {
+      color: #c08080;
+      font-style: italic;
+      font-size: 1rem;
+    }
+
+    .section-header {
+      background: #2a0f0f;
+      border-left: 4px solid #8b1a1a;
+      padding: 0.6rem 1rem;
+      margin: 2rem 0 1rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #c08080;
+    }
+
+    .question-block {
+      background: #220c0c;
+      border: 1px solid #3a1515;
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .question-text {
+      font-size: 1rem;
+      line-height: 1.55;
+      margin-bottom: 0.9rem;
+      color: #f0e6e0;
+    }
+
+    .q-num {
+      color: #8b1a1a;
+      font-weight: bold;
+      margin-right: 0.4em;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid #3a1515;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      background: #1a0a0a;
+      user-select: none;
+    }
+
+    .option:hover {
+      background: #2e1010;
+      border-color: #6b1212;
+    }
+
+    .option input[type="radio"] {
+      accent-color: #8b1a1a;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+
+    .option.correct {
+      background: #0a2a0a;
+      border-color: #3a7a3a;
+      color: #90e090;
+    }
+
+    .option.wrong {
+      background: #2a0a0a;
+      border-color: #8b1a1a;
+      color: #e06060;
+    }
+
+    .option.reveal-correct {
+      background: #0a2a0a;
+      border-color: #3a7a3a;
+      color: #90e090;
+    }
+
+    .option label {
+      cursor: pointer;
+      line-height: 1.4;
+      font-size: 0.95rem;
+    }
+
+    .feedback {
+      margin-top: 0.7rem;
+      font-size: 0.88rem;
+      font-style: italic;
+      color: #b08080;
+      display: none;
+      line-height: 1.45;
+    }
+
+    .feedback.show { display: block; }
+    .feedback.correct-fb { color: #70c070; }
+    .feedback.wrong-fb { color: #d07070; }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin: 2.5rem 0 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.65rem 1.6rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #submit-btn {
+      background: #8b1a1a;
+      color: #f0e6e0;
+    }
+
+    #submit-btn:hover { background: #a82020; }
+
+    #reset-btn {
+      background: #2a1515;
+      color: #c08080;
+      border: 1px solid #3a2020;
+    }
+
+    #reset-btn:hover { background: #3a1818; }
+
+    #results {
+      display: none;
+      background: #220c0c;
+      border: 1px solid #8b1a1a;
+      border-radius: 6px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    #results h2 {
+      color: #e8a0a0;
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    #score-line {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #f0e6e0;
+      margin: 0.5rem 0;
+    }
+
+    #result-msg {
+      color: #c08080;
+      font-style: italic;
+      margin-top: 0.4rem;
+    }
+
+    .progress-bar-wrap {
+      background: #3a1515;
+      border-radius: 3px;
+      height: 6px;
+      margin: 1rem 0 0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: #8b1a1a;
+      border-radius: 3px;
+      transition: width 0.4s;
+    }
+
+    @media (max-width: 480px) {
+      header h1 { font-size: 1.8rem; }
+      .question-block { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Carmen Chorus Quiz</h1>
+    <p>For English-speaking chorus members &mdash; characters, translations, and what&rsquo;s going on</p>
+  </header>
+
+  <form id="quiz-form">
+
+    <div class="section-header">Part 1 &mdash; The Characters</div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">1.</span> Carmen works at:</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q1" value="a"> <span>A tavern in Seville</span></label>
+        <label class="option"><input type="radio" name="q1" value="b"> <span>A cigarette factory in Seville</span></label>
+        <label class="option"><input type="radio" name="q1" value="c"> <span>A gypsy camp outside the city</span></label>
+        <label class="option"><input type="radio" name="q1" value="d"> <span>A restaurant near the bullfighting arena</span></label>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">2.</span> Don Jos&eacute; is:</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q2" value="a"> <span>A bullfighter</span></label>
+        <label class="option"><input type="radio" name="q2" value="b"> <span>A smuggler</span></label>
+        <label class="option"><input type="radio" name="q2" value="c"> <span>A soldier (corporal) in the Spanish dragoons</span></label>
+        <label class="option"><input type="radio" name="q2" value="d"> <span>A tavern owner</span></label>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">3.</span> Escamillo is famous for being:</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q3" value="a"> <span>A soldier hero from the war</span></label>
+        <label class="option"><input type="radio" name="q3" value="b"> <span>A bullfighter (toreador)</span></label>
+        <label class="option"><input type="radio" name="q3" value="c"> <span>A smuggler chief</span></label>
+        <label class="option"><input type="radio" name="q3" value="d"> <span>A flamenco singer</span></label>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">4.</span> Who is Micaëla?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q4" value="a"> <span>One of Carmen&rsquo;s gypsy friends who works as a smuggler</span></label>
+        <label class="option"><input type="radio" name="q4" value="b"> <span>The wife of Escamillo</span></label>
+        <label class="option"><input type="radio" name="q4" value="c"> <span>A woman from Don Jos&eacute;&rsquo;s hometown who loves him and brings news from his mother</span></label>
+        <label class="option"><input type="radio" name="q4" value="d"> <span>The owner of Lillas Pastia&rsquo;s inn</span></label>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">5.</span> Frasquita and Merc&egrave;des are:</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q5" value="a"> <span>Don Jos&eacute;&rsquo;s sisters</span></label>
+        <label class="option"><input type="radio" name="q5" value="b"> <span>Factory workers who testify against Carmen in the fight scene</span></label>
+        <label class="option"><input type="radio" name="q5" value="c"> <span>Carmen&rsquo;s gypsy friends who work with the smugglers</span></label>
+        <label class="option"><input type="radio" name="q5" value="d"> <span>Soldiers&rsquo; wives who appear in Act 2</span></label>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">6.</span> Zuniga is:</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q6" value="a"> <span>Carmen&rsquo;s father, who disapproves of her lifestyle</span></label>
+        <label class="option"><input type="radio" name="q6" value="b"> <span>A rival bullfighter to Escamillo</span></label>
+        <label class="option"><input type="radio" name="q6" value="c"> <span>A lieutenant &mdash; Don Jos&eacute;&rsquo;s superior officer</span></label>
+        <label class="option"><input type="radio" name="q6" value="d"> <span>The leader of the smuggling gang</span></label>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">7.</span> Where does the opera take place?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q7" value="a"> <span>Paris, France</span></label>
+        <label class="option"><input type="radio" name="q7" value="b"> <span>Granada, Spain</span></label>
+        <label class="option"><input type="radio" name="q7" value="c"> <span>Seville, Spain</span></label>
+        <label class="option"><input type="radio" name="q7" value="d"> <span>Madrid, Spain</span></label>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="section-header">Part 2 &mdash; What You&rsquo;re Singing (Translations)</div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">8.</span> In the opening soldiers&rsquo; chorus, what are the soldiers actually doing?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q8" value="a"> <span>Marching to reinforce the city gates</span></label>
+        <label class="option"><input type="radio" name="q8" value="b"> <span>Sitting around watching people pass by in the square and commenting on the women</span></label>
+        <label class="option"><input type="radio" name="q8" value="c"> <span>Chasing smugglers through the streets</span></label>
+        <label class="option"><input type="radio" name="q8" value="d"> <span>Escorting a prisoner to jail</span></label>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">9.</span> Carmen&rsquo;s famous first aria is called the Habanera (<em>L&rsquo;amour est un oiseau rebelle</em>). What does that title mean?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q9" value="a"> <span>&ldquo;Love is a beautiful dream&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q9" value="b"> <span>&ldquo;Love is a dangerous game&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q9" value="c"> <span>&ldquo;Love is a rebellious bird&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q9" value="d"> <span>&ldquo;Love is a restless soldier&rdquo;</span></label>
+      </div>
+      <div class="feedback">The Habanera compares love to a wild bird that comes when you&rsquo;re not calling it and flies away when you want it most.</div>
+    </div>
+
+    <div class="question-block" data-answer="a">
+      <p class="question-text"><span class="q-num">10.</span> The chorus responds to Carmen&rsquo;s Habanera with <em>L&rsquo;amour est enfant de Boh&egrave;me</em>. What does this mean?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q10" value="a"> <span>&ldquo;Love is a child of Bohemia &mdash; it has never known any law&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q10" value="b"> <span>&ldquo;Love is a Bohemian festival celebrated in spring&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q10" value="c"> <span>&ldquo;Love is a child&rsquo;s game, played only by gypsies&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q10" value="d"> <span>&ldquo;Love belongs to Bohemia &mdash; all other loves are false&rdquo;</span></label>
+      </div>
+      <div class="feedback">&ldquo;Boh&egrave;me&rdquo; here doesn&rsquo;t mean the Czech region &mdash; it&rsquo;s the French word for &ldquo;gypsy/Romani life.&rdquo; The line means love follows no rules.</div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">11.</span> In Act 1, the children&rsquo;s march chorus sings <em>Avec la garde montante</em>. What is that about?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q11" value="a"> <span>Children singing a lullaby while the soldiers sleep</span></label>
+        <label class="option"><input type="radio" name="q11" value="b"> <span>Street children marching along with the incoming relief guard, mimicking the soldiers</span></label>
+        <label class="option"><input type="radio" name="q11" value="c"> <span>Children warning the town that the soldiers are coming</span></label>
+        <label class="option"><input type="radio" name="q11" value="d"> <span>Children celebrating a festival in the square</span></label>
+      </div>
+      <div class="feedback"><em>La garde montante</em> = &ldquo;the relief guard&rdquo; (the new soldiers coming on duty). The kids think it&rsquo;s a great parade.</div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">12.</span> Escamillo&rsquo;s Toreador Song in Act 2 (<em>Votre toast, je peux vous le rendre</em>) is about:</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q12" value="a"> <span>His troubled feelings for Carmen and whether to pursue her</span></label>
+        <label class="option"><input type="radio" name="q12" value="b"> <span>The thrill of the bullfight, the roaring crowd, and love waiting for him at the end</span></label>
+        <label class="option"><input type="radio" name="q12" value="c"> <span>His journey from Granada to compete in Seville</span></label>
+        <label class="option"><input type="radio" name="q12" value="d"> <span>How the life of a soldier and a bullfighter are the same</span></label>
+      </div>
+      <div class="feedback">It&rsquo;s essentially Escamillo&rsquo;s self-promotional entrance. He describes the arena, the crowd screaming his name, and says that &ldquo;love awaits&rdquo; &mdash; which is when he notices Carmen.</div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">13.</span> The chorus responds to the Toreador Song with <em>Tor&eacute;ador, en garde!</em> What does <em>en garde</em> mean?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q13" value="a"> <span>&ldquo;Come back!&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q13" value="b"> <span>&ldquo;On guard!&rdquo; or &ldquo;Stay sharp!&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q13" value="c"> <span>&ldquo;Well done!&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q13" value="d"> <span>&ldquo;Watch out for the bull!&rdquo;</span></label>
+      </div>
+      <div class="feedback">It&rsquo;s the same phrase as in fencing. The crowd is basically cheering &ldquo;Stay alert in there!&rdquo; &mdash; excitement, not warning.</div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">14.</span> The Chanson boh&egrave;me (the gypsy dance number in Act 2) is about:</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q14" value="a"> <span>Sneaking contraband across the mountains at night</span></label>
+        <label class="option"><input type="radio" name="q14" value="b"> <span>Gypsies telling fortunes for the soldiers</span></label>
+        <label class="option"><input type="radio" name="q14" value="c"> <span>Wild dancing and music by firelight, getting faster and more frenzied</span></label>
+        <label class="option"><input type="radio" name="q14" value="d"> <span>A gypsy wedding celebration</span></label>
+      </div>
+      <div class="feedback"><em>Les tringles des sistres tintaient</em> = &ldquo;The rods of the sistrums jingled.&rdquo; It&rsquo;s pure sensory description: fire, instruments, dancing that builds to a frenzy. The point is atmosphere, not story.</div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">15.</span> In Act 4, the crowd sings <em>Les voici! voici la quadrille!</em> What does this mean?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q15" value="a"> <span>&ldquo;Beware! The soldiers are coming!&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q15" value="b"> <span>&ldquo;Here they are! Here comes the quadrille [the bullfighters&rsquo; procession]!&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q15" value="c"> <span>&ldquo;Look out! Here comes the bull!&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q15" value="d"> <span>&ldquo;The show is over! Go home!&rdquo;</span></label>
+      </div>
+      <div class="feedback">The <em>quadrille</em> is the formal procession of bullfighters entering the arena. This is the big festive crowd moment before the finale turns dark.</div>
+    </div>
+
+    <div class="section-header">Part 3 &mdash; What&rsquo;s Happening Around You (Plot)</div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">16.</span> Why does Carmen get arrested in Act 1?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q16" value="a"> <span>She was caught smuggling tobacco out of the factory</span></label>
+        <label class="option"><input type="radio" name="q16" value="b"> <span>She attacked another factory worker (Manuelita) with a knife during a fight</span></label>
+        <label class="option"><input type="radio" name="q16" value="c"> <span>She insulted Lieutenant Zuniga in front of his troops</span></label>
+        <label class="option"><input type="radio" name="q16" value="d"> <span>She was caught trying to escape from Seville</span></label>
+      </div>
+      <div class="feedback">The factory girls come out, a fight breaks out inside, and witnesses report Carmen started it and used a knife. Zuniga orders Don Jos&eacute; to arrest her.</div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">17.</span> What does Carmen do with a flower in Act 1 to set the whole story in motion?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q17" value="a"> <span>Throws it at Zuniga to provoke him</span></label>
+        <label class="option"><input type="radio" name="q17" value="b"> <span>Throws it at Don Jos&eacute;, flirting with him while he tries to ignore her</span></label>
+        <label class="option"><input type="radio" name="q17" value="c"> <span>Drops it at Escamillo&rsquo;s feet as a love token</span></label>
+        <label class="option"><input type="radio" name="q17" value="d"> <span>Puts it on the factory gate as a signal to the smugglers</span></label>
+      </div>
+      <div class="feedback">Don Jos&eacute; is deliberately not watching Carmen (he&rsquo;s fixing a bayonet, pointedly ignoring all the flirting going on). She walks right up and throws the flower at him. He keeps it.</div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">18.</span> How does Don Jos&eacute; end up joining the smugglers between Acts 1 and 2?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q18" value="a"> <span>He voluntarily deserts the army to follow Carmen</span></label>
+        <label class="option"><input type="radio" name="q18" value="b"> <span>He is bribed with a large sum of money by Danac&iuml;re</span></label>
+        <label class="option"><input type="radio" name="q18" value="c"> <span>He loosened Carmen&rsquo;s bonds and let her escape, was jailed for it, then fought Zuniga &mdash; so he had to flee</span></label>
+        <label class="option"><input type="radio" name="q18" value="d"> <span>He is dismissed from the army after the factory riot</span></label>
+      </div>
+      <div class="feedback">Carmen seduces Jos&eacute; into releasing her (the Seguidilla at the end of Act 1). He serves two months in jail. By Act 2 he&rsquo;s just been released &mdash; but when Zuniga shows up at the tavern, Jos&eacute; fights him and the smugglers have to take him in.</div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">19.</span> What do the card readings predict in Act 3?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q19" value="a"> <span>That Don Jos&eacute; will be captured by the army</span></label>
+        <label class="option"><input type="radio" name="q19" value="b"> <span>That the smuggling operation will succeed</span></label>
+        <label class="option"><input type="radio" name="q19" value="c"> <span>Death &mdash; first for Carmen, then for Don Jos&eacute;</span></label>
+        <label class="option"><input type="radio" name="q19" value="d"> <span>That Carmen and Escamillo will marry</span></label>
+      </div>
+      <div class="feedback">Frasquita and Merc&egrave;des draw happy cards. Carmen draws death, then draws again &mdash; still death. She accepts it with fatalistic calm. This is one of the most important emotional moments in the opera.</div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">20.</span> Why does Mica&euml;la come to find Don Jos&eacute; in Act 3?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q20" value="a"> <span>She wants to warn him that soldiers are on their way to arrest the smugglers</span></label>
+        <label class="option"><input type="radio" name="q20" value="b"> <span>She still loves him and wants him to leave Carmen before it&rsquo;s too late</span></label>
+        <label class="option"><input type="radio" name="q20" value="c"> <span>His mother is dying and wants to see him one last time</span></label>
+        <label class="option"><input type="radio" name="q20" value="d"> <span>She carries a letter from the army offering Jos&eacute; a pardon</span></label>
+      </div>
+      <div class="feedback">Mica&euml;la actually sneaks into the smugglers&rsquo; mountain hideout alone to find him. It takes courage. She does still love him, but the stated reason is his dying mother.</div>
+    </div>
+
+    <div class="question-block" data-answer="d">
+      <p class="question-text"><span class="q-num">21.</span> By Act 4, Carmen is in love with:</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q21" value="a"> <span>Don Jos&eacute;</span></label>
+        <label class="option"><input type="radio" name="q21" value="b"> <span>Zuniga</span></label>
+        <label class="option"><input type="radio" name="q21" value="c"> <span>Remendado</span></label>
+        <label class="option"><input type="radio" name="q21" value="d"> <span>Escamillo</span></label>
+      </div>
+      <div class="feedback">Carmen moved on from Don Jos&eacute; during Act 3. She and Escamillo arrive at the bullfight together. She&rsquo;s happy. This makes the ending even more brutal.</div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">22.</span> What is Lillas Pastia&rsquo;s inn (the Act 2 setting)?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q22" value="a"> <span>A prison where Carmen is held after the factory fight</span></label>
+        <label class="option"><input type="radio" name="q22" value="b"> <span>A shady tavern on the edge of town where soldiers drink and Carmen&rsquo;s gang does business</span></label>
+        <label class="option"><input type="radio" name="q22" value="c"> <span>The bullfighting arena where Escamillo performs</span></label>
+        <label class="option"><input type="radio" name="q22" value="d"> <span>The cigarette factory after hours</span></label>
+      </div>
+      <div class="feedback">Think of it as a bar that&rsquo;s also a front for smuggling operations. The authorities tolerate it; Lillas Pastia is connected. It&rsquo;s where Act 2 opens.</div>
+    </div>
+
+    <div class="section-header">Part 4 &mdash; The Big Picture</div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">23.</span> Don Jos&eacute; hears a bugle call during Act 2 while Carmen is dancing for him. What happens?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q23" value="a"> <span>He ignores it and stays, proving his love for Carmen</span></label>
+        <label class="option"><input type="radio" name="q23" value="b"> <span>He says he must return to barracks; Carmen is furious and mocks him for being a good little soldier</span></label>
+        <label class="option"><input type="radio" name="q23" value="c"> <span>He uses it as an excuse to leave Carmen and return to Mica&euml;la</span></label>
+        <label class="option"><input type="radio" name="q23" value="d"> <span>He pretends not to hear it because Zuniga is watching</span></label>
+      </div>
+      <div class="feedback">The retreat bugle is the turning point of Act 2. Carmen sees it as proof that Jos&eacute; values his uniform over her. She sings <em>Ah! que j&rsquo;&#233;tais bien sotte</em> (&ldquo;Ah, what a fool I was&rdquo;) and throws his cap and sword at him.</div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">24.</span> Carmen refuses to go back to Don Jos&eacute; at the end of Act 4 even though she knows it may kill her. Why?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q24" value="a"> <span>She no longer loves anyone &mdash; she only cares about the smuggling business now</span></label>
+        <label class="option"><input type="radio" name="q24" value="b"> <span>She is free and will not be owned or controlled; she would rather die than submit</span></label>
+        <label class="option"><input type="radio" name="q24" value="c"> <span>She doesn&rsquo;t believe Jos&eacute; will actually hurt her</span></label>
+        <label class="option"><input type="radio" name="q24" value="d"> <span>She is waiting for Escamillo to come out of the ring and rescue her</span></label>
+      </div>
+      <div class="feedback">This is the opera&rsquo;s central idea. Carmen told the cards she would die. She throws the ring Jos&eacute; gave her at his feet anyway. Her freedom matters more than her life. This is why she&rsquo;s a tragic hero, not just a victim.</div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">25.</span> How does the opera end?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q25" value="a"> <span>Carmen and Don Jos&eacute; reconcile and flee together</span></label>
+        <label class="option"><input type="radio" name="q25" value="b"> <span>Don Jos&eacute; stabs Carmen outside the bullring just as the crowd inside cheers Escamillo&rsquo;s victory, then gives himself up</span></label>
+        <label class="option"><input type="radio" name="q25" value="c"> <span>Carmen is arrested by soldiers and Don Jos&eacute; escapes into the mountains</span></label>
+        <label class="option"><input type="radio" name="q25" value="d"> <span>Escamillo is killed in the ring and Carmen, grief-stricken, flees with Jos&eacute;</span></label>
+      </div>
+      <div class="feedback">The simultaneous triumph inside and murder outside is the finale&rsquo;s central dramatic irony. The crowd&rsquo;s cheers of <em>Victoire!</em> overlap with Carmen&rsquo;s dying moments.</div>
+    </div>
+
+    <div class="question-block" data-answer="a">
+      <p class="question-text"><span class="q-num">26.</span> <em>Sur la place, chacun passe</em> (the opening soldiers&rsquo; chorus) translates roughly as:</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q26" value="a"> <span>&ldquo;In the square, everyone passes by&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q26" value="b"> <span>&ldquo;On the plaza, the soldiers stand guard&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q26" value="c"> <span>&ldquo;In the square, the women are beautiful&rdquo;</span></label>
+        <label class="option"><input type="radio" name="q26" value="d"> <span>&ldquo;Above the square, the birds are flying&rdquo;</span></label>
+      </div>
+      <div class="feedback">Very literal: the soldiers are bored, watching the foot traffic. <em>Chacun</em> = &ldquo;everyone/each person.&rdquo; <em>Passe</em> = &ldquo;passes.&rdquo; The whole opening is an exercise in killing time on guard duty.</div>
+    </div>
+
+    <div class="question-block" data-answer="b">
+      <p class="question-text"><span class="q-num">27.</span> What happened to Don Jos&eacute; between Acts 1 and 2 (why does Carmen look surprised when he walks into the tavern)?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q27" value="a"> <span>He went home to Navarre to see his dying mother</span></label>
+        <label class="option"><input type="radio" name="q27" value="b"> <span>He was in prison for two months for letting Carmen escape</span></label>
+        <label class="option"><input type="radio" name="q27" value="c"> <span>He was sent to fight in a war in Morocco</span></label>
+        <label class="option"><input type="radio" name="q27" value="d"> <span>He deserted the army and had been hiding in the mountains</span></label>
+      </div>
+      <div class="feedback">Jos&eacute; loosened the rope on Carmen&rsquo;s wrists, she pushed him and ran. He was court-martialed, demoted, and served two months in military jail. He&rsquo;s just been released when Act 2 begins. Carmen wasn&rsquo;t sure he&rsquo;d come.</div>
+    </div>
+
+    <div class="question-block" data-answer="c">
+      <p class="question-text"><span class="q-num">28.</span> Why does the Act 4 setting &mdash; the bullfighting arena &mdash; matter to the story?</p>
+      <div class="options">
+        <label class="option"><input type="radio" name="q28" value="a"> <span>It is where Carmen and Jos&eacute; first met, so their story ends where it began</span></label>
+        <label class="option"><input type="radio" name="q28" value="b"> <span>Bullfighters are hated by soldiers, so it guarantees a confrontation</span></label>
+        <label class="option"><input type="radio" name="q28" value="c"> <span>It brings together all the threads: Escamillo&rsquo;s triumph, Carmen&rsquo;s new happiness, and Jos&eacute;&rsquo;s obsession &mdash; in the same place, at the same moment</span></label>
+        <label class="option"><input type="radio" name="q28" value="d"> <span>It is the only public place in Seville where soldiers cannot legally carry weapons</span></label>
+      </div>
+      <div class="feedback">The crowd celebrates inside while the private tragedy plays out just outside the gates. The drama depends on everything converging here: Escamillo winning, Carmen radiantly happy with him, and Jos&eacute; who has lost everything.</div>
+    </div>
+
+    <div class="controls">
+      <button type="button" id="submit-btn">Submit Quiz</button>
+      <button type="button" id="reset-btn">Start Over</button>
+    </div>
+
+  </form>
+
+  <div id="results">
+    <h2>Your Score</h2>
+    <div id="score-line"></div>
+    <div id="result-msg"></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="score-bar"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const TOTAL = 28;
+
+  document.getElementById('submit-btn').addEventListener('click', function () {
+    const blocks = document.querySelectorAll('.question-block');
+    let score = 0;
+    let unanswered = 0;
+
+    blocks.forEach(function (block) {
+      const correct = block.dataset.answer;
+      const name = block.querySelector('input[type="radio"]').name;
+      const chosen = block.querySelector('input[name="' + name + '"]:checked');
+      const feedback = block.querySelector('.feedback');
+      const options = block.querySelectorAll('.option');
+
+      // Reset state
+      options.forEach(function (opt) {
+        opt.classList.remove('correct', 'wrong', 'reveal-correct');
+        opt.querySelector('input').disabled = true;
+      });
+
+      if (!chosen) {
+        unanswered++;
+        // Reveal correct answer
+        options.forEach(function (opt) {
+          if (opt.querySelector('input').value === correct) {
+            opt.classList.add('reveal-correct');
+          }
+        });
+        if (feedback.textContent.trim()) {
+          feedback.classList.add('show', 'wrong-fb');
+        }
+        return;
+      }
+
+      const picked = chosen.value;
+      options.forEach(function (opt) {
+        const v = opt.querySelector('input').value;
+        if (v === correct) opt.classList.add('correct');
+        if (v === picked && picked !== correct) opt.classList.add('wrong');
+      });
+
+      if (picked === correct) {
+        score++;
+        if (feedback.textContent.trim()) {
+          feedback.classList.add('show', 'correct-fb');
+        }
+      } else {
+        if (feedback.textContent.trim()) {
+          feedback.classList.add('show', 'wrong-fb');
+        }
+      }
+    });
+
+    // Show results
+    const pct = Math.round((score / TOTAL) * 100);
+    document.getElementById('score-line').textContent = score + ' / ' + TOTAL;
+    document.getElementById('score-bar').style.width = pct + '%';
+
+    let msg;
+    if (score === TOTAL) {
+      msg = 'Perfect. You know this opera cold.';
+    } else if (score >= 24) {
+      msg = 'Strong. A quick review of the misses and you\'re set.';
+    } else if (score >= 18) {
+      msg = 'Decent foundation — go back over the sections you missed.';
+    } else if (score >= 12) {
+      msg = 'You have the bones. Read through the answer key and take it again.';
+    } else {
+      msg = 'Time to dig in — start with Part 1 (the characters) and work forward.';
+    }
+
+    if (unanswered > 0) {
+      msg += ' (' + unanswered + ' question' + (unanswered > 1 ? 's' : '') + ' left blank — correct answers are highlighted in green.)';
+    }
+
+    document.getElementById('result-msg').textContent = msg;
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('submit-btn').disabled = true;
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function () {
+    const inputs = document.querySelectorAll('input[type="radio"]');
+    inputs.forEach(function (inp) {
+      inp.checked = false;
+      inp.disabled = false;
+    });
+
+    const options = document.querySelectorAll('.option');
+    options.forEach(function (opt) {
+      opt.classList.remove('correct', 'wrong', 'reveal-correct');
+    });
+
+    const feedbacks = document.querySelectorAll('.feedback');
+    feedbacks.forEach(function (fb) {
+      fb.classList.remove('show', 'correct-fb', 'wrong-fb');
+    });
+
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('submit-btn').disabled = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
