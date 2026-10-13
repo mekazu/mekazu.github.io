@@ -156,22 +156,37 @@
       transition: background 0.15s;
     }
 
-    #submit-btn {
+    .submit-btn {
       background: #8b1a1a;
       color: #f0e6e0;
     }
 
-    #submit-btn:hover { background: #a82020; }
+    .submit-btn:hover { background: #a82020; }
 
-    #reset-btn {
+    .submit-btn:disabled { display: none; }
+
+    .reset-btn {
       background: #2a1515;
       color: #c08080;
       border: 1px solid #3a2020;
     }
 
-    #reset-btn:hover { background: #3a1818; }
+    .reset-btn:hover { background: #3a1818; }
 
-    #results {
+    .next-btn {
+      font-size: 1rem;
+      padding: 0.65rem 1.6rem;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: background 0.15s;
+      background: #8b1a1a;
+      color: #f0e6e0;
+      margin-left: auto;
+    }
+
+    .next-btn:hover { background: #a82020; }
+
+    .results {
       display: none;
       background: #220c0c;
       border: 1px solid #8b1a1a;
@@ -181,24 +196,84 @@
       text-align: center;
     }
 
-    #results h2 {
+    .results h2 {
       color: #e8a0a0;
       font-size: 1.6rem;
       margin-bottom: 0.5rem;
     }
 
-    #score-line {
+    .score-line {
       font-size: 2.5rem;
       font-weight: bold;
       color: #f0e6e0;
       margin: 0.5rem 0;
     }
 
-    #result-msg {
+    .result-msg {
       color: #c08080;
       font-style: italic;
       margin-top: 0.4rem;
     }
+
+    .section-nav {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .section-nav a {
+      display: block;
+      background: #220c0c;
+      border: 1px solid #3a1515;
+      border-radius: 6px;
+      padding: 0.7rem 0.8rem;
+      color: #f0e6e0;
+      text-decoration: none;
+      line-height: 1.3;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .section-nav a:hover { background: #2e1010; border-color: #6b1212; }
+
+    .section-nav a[aria-current="true"] {
+      border-color: #8b1a1a;
+      background: #2a0f0f;
+      box-shadow: inset 0 -3px 0 #8b1a1a;
+    }
+
+    .nav-part {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #c08080;
+    }
+
+    .nav-title {
+      display: block;
+      font-size: 0.95rem;
+      margin: 0.2rem 0;
+    }
+
+    .nav-status {
+      display: block;
+      font-size: 0.8rem;
+      font-style: italic;
+      color: #b08080;
+    }
+
+    .nav-status.done { color: #70c070; font-style: normal; }
+
+    .overall {
+      text-align: center;
+      font-size: 0.88rem;
+      font-style: italic;
+      color: #b08080;
+      min-height: 1.3em;
+    }
+
+    .quiz-section[hidden] { display: none; }
 
     .progress-bar-wrap {
       background: #3a1515;
@@ -217,6 +292,7 @@
     @media (max-width: 480px) {
       header h1 { font-size: 1.8rem; }
       .question-block { padding: 1rem; }
+      .section-nav { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -228,8 +304,12 @@
     <p>For English-speaking chorus members &mdash; characters, translations, and what&rsquo;s going on</p>
   </header>
 
-  <form id="quiz-form">
+  <nav class="section-nav" aria-label="Quiz sections"></nav>
+  <p class="overall"></p>
 
+  <main id="quiz">
+
+    <section class="quiz-section" id="part-1" data-title="The Characters">
     <div class="section-header">Part 1 &mdash; The Characters</div>
 
     <div class="question-block" data-answer="b">
@@ -309,6 +389,9 @@
       <div class="feedback"></div>
     </div>
 
+    </section>
+
+    <section class="quiz-section" id="part-2" data-title="Translations">
     <div class="section-header">Part 2 &mdash; What You&rsquo;re Singing (Translations)</div>
 
     <div class="question-block" data-answer="b">
@@ -399,6 +482,9 @@
       <div class="feedback">The <em>quadrille</em> is the formal procession of bullfighters entering the arena. This is the big festive crowd moment before the finale turns dark.</div>
     </div>
 
+    </section>
+
+    <section class="quiz-section" id="part-3" data-title="The Plot">
     <div class="section-header">Part 3 &mdash; What&rsquo;s Happening Around You (Plot)</div>
 
     <div class="question-block" data-answer="b">
@@ -478,6 +564,9 @@
       <div class="feedback">Think of it as a bar that&rsquo;s also a front for smuggling operations. The authorities tolerate it; Lillas Pastia is connected. It&rsquo;s where Act 2 opens.</div>
     </div>
 
+    </section>
+
+    <section class="quiz-section" id="part-4" data-title="The Big Picture">
     <div class="section-header">Part 4 &mdash; The Big Picture</div>
 
     <div class="question-block" data-answer="b">
@@ -546,42 +635,68 @@
       <div class="feedback">The crowd celebrates inside while the private tragedy plays out just outside the gates. The drama depends on everything converging here: Escamillo winning, Carmen radiantly happy with him, and Jos&eacute; who has lost everything.</div>
     </div>
 
-    <div class="controls">
-      <button type="button" id="submit-btn">Submit Quiz</button>
-      <button type="button" id="reset-btn">Start Over</button>
-    </div>
+    </section>
 
-  </form>
-
-  <div id="results">
-    <h2>Your Score</h2>
-    <div id="score-line"></div>
-    <div id="result-msg"></div>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill" id="score-bar"></div>
-    </div>
-  </div>
+  </main>
 
 </div>
 
 <script>
-  const TOTAL = 28;
+  const sections = Array.from(document.querySelectorAll('.quiz-section'));
+  const nav = document.querySelector('.section-nav');
+  const overall = document.querySelector('.overall');
+  const scores = {};
 
-  document.getElementById('submit-btn').addEventListener('click', function () {
-    const blocks = document.querySelectorAll('.question-block');
+  function resultMessage(score, total) {
+    const pct = score / total;
+    if (score === total) return 'Perfect. You know this section cold.';
+    if (pct >= 0.85) return 'Strong. A quick review of the misses and you\'re set.';
+    if (pct >= 0.64) return 'Decent foundation — go back over the questions you missed.';
+    if (pct >= 0.43) return 'You have the bones. Read through the explanations and take it again.';
+    return 'Time to dig in — read through the explanations and try this section again.';
+  }
+
+  function updateNav() {
+    let done = 0, right = 0, asked = 0;
+    sections.forEach(function (section, i) {
+      const status = nav.children[i].querySelector('.nav-status');
+      const total = section.querySelectorAll('.question-block').length;
+      if (section.id in scores) {
+        status.textContent = 'Score: ' + scores[section.id] + ' / ' + total;
+        status.classList.add('done');
+        done++; right += scores[section.id]; asked += total;
+      } else {
+        status.textContent = total + ' questions';
+        status.classList.remove('done');
+      }
+    });
+    overall.textContent = done === 0 ? 'Pick a section to start. Each one can be done on its own.'
+      : done + ' of ' + sections.length + ' sections done · ' + right + ' / ' + asked + ' correct so far';
+  }
+
+  function show(id) {
+    const target = sections.find(function (s) { return s.id === id; }) || sections[0];
+    sections.forEach(function (section, i) {
+      section.hidden = section !== target;
+      nav.children[i].setAttribute('aria-current', section === target ? 'true' : 'false');
+    });
+    window.scrollTo({ top: 0 });
+  }
+
+  function submitSection(section) {
+    const blocks = section.querySelectorAll('.question-block');
+    const total = blocks.length;
     let score = 0;
     let unanswered = 0;
 
     blocks.forEach(function (block) {
       const correct = block.dataset.answer;
-      const name = block.querySelector('input[type="radio"]').name;
-      const chosen = block.querySelector('input[name="' + name + '"]:checked');
+      const chosen = block.querySelector('input[type="radio"]:checked');
       const feedback = block.querySelector('.feedback');
       const options = block.querySelectorAll('.option');
+      const hasFeedback = feedback.textContent.trim() !== '';
 
-      // Reset state
       options.forEach(function (opt) {
-        opt.classList.remove('correct', 'wrong', 'reveal-correct');
         opt.querySelector('input').disabled = true;
       });
 
@@ -589,13 +704,9 @@
         unanswered++;
         // Reveal correct answer
         options.forEach(function (opt) {
-          if (opt.querySelector('input').value === correct) {
-            opt.classList.add('reveal-correct');
-          }
+          if (opt.querySelector('input').value === correct) opt.classList.add('reveal-correct');
         });
-        if (feedback.textContent.trim()) {
-          feedback.classList.add('show', 'wrong-fb');
-        }
+        if (hasFeedback) feedback.classList.add('show', 'wrong-fb');
         return;
       }
 
@@ -606,67 +717,77 @@
         if (v === picked && picked !== correct) opt.classList.add('wrong');
       });
 
-      if (picked === correct) {
-        score++;
-        if (feedback.textContent.trim()) {
-          feedback.classList.add('show', 'correct-fb');
-        }
-      } else {
-        if (feedback.textContent.trim()) {
-          feedback.classList.add('show', 'wrong-fb');
-        }
-      }
+      if (picked === correct) score++;
+      if (hasFeedback) feedback.classList.add('show', picked === correct ? 'correct-fb' : 'wrong-fb');
     });
 
-    // Show results
-    const pct = Math.round((score / TOTAL) * 100);
-    document.getElementById('score-line').textContent = score + ' / ' + TOTAL;
-    document.getElementById('score-bar').style.width = pct + '%';
-
-    let msg;
-    if (score === TOTAL) {
-      msg = 'Perfect. You know this opera cold.';
-    } else if (score >= 24) {
-      msg = 'Strong. A quick review of the misses and you\'re set.';
-    } else if (score >= 18) {
-      msg = 'Decent foundation — go back over the sections you missed.';
-    } else if (score >= 12) {
-      msg = 'You have the bones. Read through the answer key and take it again.';
-    } else {
-      msg = 'Time to dig in — start with Part 1 (the characters) and work forward.';
-    }
-
+    let msg = resultMessage(score, total);
     if (unanswered > 0) {
       msg += ' (' + unanswered + ' question' + (unanswered > 1 ? 's' : '') + ' left blank — correct answers are highlighted in green.)';
     }
 
-    document.getElementById('result-msg').textContent = msg;
-    document.getElementById('results').style.display = 'block';
-    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    document.getElementById('submit-btn').disabled = true;
-  });
+    const results = section.querySelector('.results');
+    section.querySelector('.score-line').textContent = score + ' / ' + total;
+    section.querySelector('.score-bar').style.width = Math.round((score / total) * 100) + '%';
+    section.querySelector('.result-msg').textContent = msg;
+    results.style.display = 'block';
+    results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    section.querySelector('.submit-btn').disabled = true;
 
-  document.getElementById('reset-btn').addEventListener('click', function () {
-    const inputs = document.querySelectorAll('input[type="radio"]');
-    inputs.forEach(function (inp) {
+    scores[section.id] = score;
+    updateNav();
+  }
+
+  function resetSection(section) {
+    section.querySelectorAll('input[type="radio"]').forEach(function (inp) {
       inp.checked = false;
       inp.disabled = false;
     });
-
-    const options = document.querySelectorAll('.option');
-    options.forEach(function (opt) {
+    section.querySelectorAll('.option').forEach(function (opt) {
       opt.classList.remove('correct', 'wrong', 'reveal-correct');
     });
-
-    const feedbacks = document.querySelectorAll('.feedback');
-    feedbacks.forEach(function (fb) {
+    section.querySelectorAll('.feedback').forEach(function (fb) {
       fb.classList.remove('show', 'correct-fb', 'wrong-fb');
     });
+    section.querySelector('.results').style.display = 'none';
+    section.querySelector('.submit-btn').disabled = false;
 
-    document.getElementById('results').style.display = 'none';
-    document.getElementById('submit-btn').disabled = false;
+    delete scores[section.id];
+    updateNav();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  sections.forEach(function (section, i) {
+    const num = section.id.replace('part-', '');
+    const link = document.createElement('a');
+    link.href = '#' + section.id;
+    link.innerHTML = '<span class="nav-part">Part ' + num + '</span>' +
+      '<span class="nav-title"></span><span class="nav-status"></span>';
+    link.querySelector('.nav-title').textContent = section.dataset.title;
+    nav.appendChild(link);
+
+    const next = sections[i + 1];
+    section.insertAdjacentHTML('beforeend',
+      '<div class="controls">' +
+        '<button type="button" class="submit-btn">Submit Part ' + num + '</button>' +
+        '<button type="button" class="reset-btn">Start Over</button>' +
+        (next ? '<a class="next-btn" href="#' + next.id + '" role="button">Next: Part ' +
+          next.id.replace('part-', '') + ' &rarr;</a>' : '') +
+      '</div>' +
+      '<div class="results">' +
+        '<h2>Part ' + num + ' Score</h2>' +
+        '<div class="score-line"></div>' +
+        '<div class="result-msg"></div>' +
+        '<div class="progress-bar-wrap"><div class="progress-bar-fill score-bar"></div></div>' +
+      '</div>');
+
+    section.querySelector('.submit-btn').addEventListener('click', function () { submitSection(section); });
+    section.querySelector('.reset-btn').addEventListener('click', function () { resetSection(section); });
   });
+
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+  updateNav();
+  show(location.hash.slice(1));
 </script>
 </body>
 </html>
