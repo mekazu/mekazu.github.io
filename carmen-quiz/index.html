@@ -13,6 +13,11 @@
       --azure-deep: #1f5f8b;
       --azure-bg: #10202e;
       --azure-line: #2a5a80;
+      --panel: #0f1f2e;
+      --panel-deep: #0a1621;
+      --panel-hover: #15304a;
+      --panel-active: #163852;
+      --muted: #9db6cb;
     }
 
     body {
@@ -49,7 +54,7 @@
     }
 
     .section-header {
-      background: #2a0f0f;
+      background: var(--panel-active);
       border-left: 4px solid var(--azure);
       padding: 0.6rem 1rem;
       margin: 2rem 0 1rem;
@@ -60,7 +65,7 @@
     }
 
     .question-block {
-      background: #220c0c;
+      background: var(--panel);
       border: 1px solid var(--azure-line);
       border-radius: 6px;
       padding: 1.25rem 1.5rem;
@@ -95,12 +100,12 @@
       border: 1px solid var(--azure-deep);
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s;
-      background: #1a0a0a;
+      background: var(--panel-deep);
       user-select: none;
     }
 
     .option:hover {
-      background: #2e1010;
+      background: var(--panel-hover);
       border-color: var(--azure);
     }
 
@@ -138,7 +143,7 @@
       margin-top: 0.7rem;
       font-size: 0.88rem;
       font-style: italic;
-      color: #b08080;
+      color: var(--muted);
       display: none;
       line-height: 1.45;
     }
@@ -165,11 +170,11 @@
     }
 
     .submit-btn {
-      background: #8b1a1a;
-      color: #f0e6e0;
+      background: var(--azure-deep);
+      color: #f0f6fb;
     }
 
-    .submit-btn:hover { background: #a82020; }
+    .submit-btn:hover { background: #2878b0; }
 
     .submit-btn:disabled { display: none; }
 
@@ -187,16 +192,16 @@
       border-radius: 4px;
       text-decoration: none;
       transition: background 0.15s;
-      background: #8b1a1a;
-      color: #f0e6e0;
+      background: var(--azure-deep);
+      color: #f0f6fb;
       margin-left: auto;
     }
 
-    .next-btn:hover { background: #a82020; }
+    .next-btn:hover { background: #2878b0; }
 
     .results {
       display: none;
-      background: #220c0c;
+      background: var(--panel);
       border: 1px solid var(--azure);
       border-radius: 6px;
       padding: 1.5rem;
@@ -218,7 +223,7 @@
     }
 
     .result-msg {
-      color: #c08080;
+      color: var(--muted);
       font-style: italic;
       margin-top: 0.4rem;
     }
@@ -232,7 +237,7 @@
 
     .section-nav a {
       display: block;
-      background: #220c0c;
+      background: var(--panel);
       border: 1px solid var(--azure-line);
       border-radius: 6px;
       padding: 0.7rem 0.8rem;
@@ -242,11 +247,11 @@
       transition: background 0.15s, border-color 0.15s;
     }
 
-    .section-nav a:hover { background: #2e1010; border-color: var(--azure); }
+    .section-nav a:hover { background: var(--panel-hover); border-color: var(--azure); }
 
     .section-nav a[aria-current="true"] {
       border-color: var(--azure);
-      background: #2a0f0f;
+      background: var(--panel-active);
       box-shadow: inset 0 -3px 0 var(--azure);
     }
 
@@ -268,7 +273,7 @@
       display: block;
       font-size: 0.8rem;
       font-style: italic;
-      color: #b08080;
+      color: var(--muted);
     }
 
     .nav-status.done { color: #70c070; font-style: normal; }
@@ -284,7 +289,7 @@
     .quiz-section[hidden] { display: none; }
 
     .progress-bar-wrap {
-      background: #3a1515;
+      background: var(--panel-hover);
       border-radius: 3px;
       height: 6px;
       margin: 1rem 0 0;
@@ -292,7 +297,7 @@
 
     .progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #8b1a1a, var(--azure));
+      background: linear-gradient(90deg, var(--azure-deep), var(--azure));
       border-radius: 3px;
       transition: width 0.4s;
     }
