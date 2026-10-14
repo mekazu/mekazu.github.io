@@ -12,6 +12,7 @@
       --azure-light: #8fd0f5;
       --azure-deep: #1f5f8b;
       --azure-bg: #10202e;
+      --azure-line: #2a5a80;
     }
 
     body {
@@ -31,8 +32,7 @@
       text-align: center;
       margin-bottom: 2.5rem;
       padding-bottom: 1.5rem;
-      border-bottom: 2px solid #8b1a1a;
-      box-shadow: 0 2px 0 var(--azure-deep);
+      border-bottom: 2px solid var(--azure);
     }
 
     header h1 {
@@ -61,7 +61,7 @@
 
     .question-block {
       background: #220c0c;
-      border: 1px solid #3a1515;
+      border: 1px solid var(--azure-line);
       border-radius: 6px;
       padding: 1.25rem 1.5rem;
       margin-bottom: 1rem;
@@ -92,7 +92,7 @@
       gap: 0.7rem;
       padding: 0.55rem 0.75rem;
       border-radius: 4px;
-      border: 1px solid #3a1515;
+      border: 1px solid var(--azure-deep);
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s;
       background: #1a0a0a;
@@ -101,7 +101,7 @@
 
     .option:hover {
       background: #2e1010;
-      border-color: var(--azure-deep);
+      border-color: var(--azure);
     }
 
     .option input[type="radio"] {
@@ -176,7 +176,7 @@
     .reset-btn {
       background: var(--azure-bg);
       color: var(--azure-light);
-      border: 1px solid var(--azure-deep);
+      border: 1px solid var(--azure);
     }
 
     .reset-btn:hover { background: #16304a; }
@@ -197,7 +197,7 @@
     .results {
       display: none;
       background: #220c0c;
-      border: 1px solid #8b1a1a;
+      border: 1px solid var(--azure);
       border-radius: 6px;
       padding: 1.5rem;
       margin-top: 1.5rem;
@@ -233,7 +233,7 @@
     .section-nav a {
       display: block;
       background: #220c0c;
-      border: 1px solid #3a1515;
+      border: 1px solid var(--azure-line);
       border-radius: 6px;
       padding: 0.7rem 0.8rem;
       color: #f0e6e0;
@@ -242,7 +242,7 @@
       transition: background 0.15s, border-color 0.15s;
     }
 
-    .section-nav a:hover { background: #2e1010; border-color: var(--azure-deep); }
+    .section-nav a:hover { background: #2e1010; border-color: var(--azure); }
 
     .section-nav a[aria-current="true"] {
       border-color: var(--azure);
