@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Gotham Night — Batman Game</title>
+<style>
+  html,body{margin:0;height:100%;background:#05060a;color:#ffd400;font-family:"Courier New",monospace;overflow:hidden;touch-action:none}
+  #wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+  canvas{background:#0b0e1a;max-width:100%;max-height:100%;image-rendering:pixelated;border:2px solid #222}
+  #touch{position:absolute;bottom:10px;left:0;right:0;display:none;justify-content:space-between;padding:0 14px;pointer-events:none}
+  #touch div{pointer-events:auto}
+  .btn{display:inline-block;width:64px;height:64px;line-height:64px;text-align:center;font-size:22px;background:rgba(255,212,0,.25);border:2px solid #ffd400;border-radius:50%;margin:0 4px;user-select:none}
+  @media (pointer:coarse){#touch{display:flex}}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c" width="800" height="450"></canvas>
+  <div id="touch">
+    <div><span class="btn" id="bL">◀</span><span class="btn" id="bR">▶</span></div>
+    <div><span class="btn" id="bT">✦</span><span class="btn" id="bJ">▲</span></div>
+  </div>
+</div>
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const W = cv.width, H = cv.height, GROUND = H - 60, GRAV = 0.7;
+const keys = {};
+let state = 'title', best = +localStorage.batBest || 0;
+
+addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
+  if ((e.code === 'Enter' || e.code === 'Space') && state !== 'play') start();
+  if (e.code === 'KeyX' || e.code === 'KeyJ') throwBatarang();
+});
+addEventListener('keyup', e => keys[e.code] = false);
+function hold(id, code){
+  const el = document.getElementById(id);
+  const on = e => { e.preventDefault(); keys[code] = true; if (state !== 'play') start(); if (code==='KeyX') throwBatarang(); };
+  const off = e => { e.preventDefault(); keys[code] = false; };
+  el.addEventListener('touchstart', on); el.addEventListener('touchend', off); el.addEventListener('touchcancel', off);
+}
+hold('bL','ArrowLeft'); hold('bR','ArrowRight'); hold('bJ','Space'); hold('bT','KeyX');
+cv.addEventListener('mousedown', () => { if (state !== 'play') start(); else throwBatarang(); });
+
+let p, enemies, shots, parts, score, tick, camX, buildings, wave, flash;
+
+function makeBuildings(){
+  buildings = [];
+  for (let i = 0; i < 40; i++){
+    const w = 60 + Math.random()*80, h = 100 + Math.random()*220;
+    buildings.push({x:i*110, w, h, win:Math.random()});
+  }
+}
+
+function start(){
+  p = {x:120,y:GROUND,vx:0,vy:0,w:26,h:46,face:1,hp:5,cool:0,inv:0,ground:true,glide:false};
+  enemies = []; shots = []; parts = []; score = 0; tick = 0; camX = 0; wave = 0; flash = 0;
+  makeBuildings();
+  state = 'play';
+}
+
+function throwBatarang(){
+  if (state !== 'play' || p.cool > 0) return;
+  p.cool = 14;
+  shots.push({x:p.x + p.face*14, y:p.y - 28, vx:p.face*11, life:70, rot:0});
+}
+
+function spawn(){
+  const side = Math.random() < 0.5 ? -1 : 1;
+  const x = camX + (side < 0 ? -40 : W + 40);
+  const r = Math.random();
+  if (r < 0.6) enemies.push({type:'thug',x,y:GROUND,w:26,h:44,vx:side*-(1+Math.random()*1.2+wave*.08),hp:1,t:0});
+  else if (r < 0.88) enemies.push({type:'drone',x,y:120+Math.random()*140,w:34,h:18,vx:side*-(1.5+wave*.1),hp:1,t:Math.random()*6});
+  else enemies.push({type:'brute',x,y:GROUND,w:38,h:58,vx:side*-(.8+wave*.05),hp:4,t:0});
+}
+
+function burst(x,y,color,n=10){
+  for (let i=0;i<n;i++) parts.push({x,y,vx:(Math.random()-.5)*7,vy:(Math.random()-.8)*6,life:25+Math.random()*15,color});
+}
+
+function hit(a,b){ return Math.abs(a.x-b.x) < (a.w+b.w)/2 && Math.abs((a.y-a.h/2)-(b.y-b.h/2)) < (a.h+b.h)/2; }
+
+function update(){
+  tick++;
+  wave = Math.floor(score / 500);
+  // player
+  const mv = (keys.ArrowRight||keys.KeyD ? 1:0) - (keys.ArrowLeft||keys.KeyA ? 1:0);
+  p.vx = mv * 4.2; if (mv) p.face = mv;
+  if ((keys.Space||keys.ArrowUp||keys.KeyW) && p.ground){ p.vy = -13.5; p.ground = false; }
+  p.glide = !p.ground && p.vy > 0 && (keys.Space||keys.ArrowUp||keys.KeyW);
+  p.vy += p.glide ? GRAV*0.25 : GRAV;
+  if (p.glide && p.vy > 2.2) p.vy = 2.2;
+  p.x += p.vx; p.y += p.vy;
+  if (p.y >= GROUND){ p.y = GROUND; p.vy = 0; p.ground = true; }
+  if (p.x < 20) p.x = 20;
+  camX += (p.x - W/2 - camX) * 0.1;
+  if (camX < 0) camX = 0;
+  if (p.cool > 0) p.cool--;
+  if (p.inv > 0) p.inv--;
+  if (keys.KeyX||keys.KeyJ){ if (tick % 12 === 0) throwBatarang(); }
+
+  // spawn
+  if (tick % Math.max(25, 80 - wave*6) === 0) spawn();
+
+  // shots
+  for (const s of shots){ s.x += s.vx; s.life--; s.rot += .5; }
+  shots = shots.filter(s => s.life > 0);
+
+  // enemies
+  for (const e of enemies){
+    e.t += .1;
+    if (e.type === 'drone'){ e.x += e.vx; e.y += Math.sin(e.t)*1.4; }
+    else {
+      const dir = Math.sign(p.x - e.x);
+      e.x += (e.type==='brute' ? 1.1 + wave*.05 : Math.abs(e.vx)) * dir;
+    }
+    for (const s of shots){
+      if (s.life > 0 && hit({x:s.x,y:s.y+4,w:16,h:8}, e)){
+        s.life = 0; e.hp--; burst(e.x, e.y-e.h/2, '#ffd400', 6);
+        if (e.hp <= 0){ e.dead = true; burst(e.x, e.y-e.h/2, '#f33', 14); score += e.type==='brute'?50:e.type==='drone'?20:10; }
+      }
+    }
+    if (!e.dead && p.inv <= 0 && hit(p, e)){
+      p.hp--; p.inv = 90; flash = 8; burst(p.x, p.y-24, '#fff', 12);
+      p.vx = 0; p.x += Math.sign(p.x - e.x) * 40; p.vy = -7; p.ground = false;
+      if (p.hp <= 0){ state = 'over'; best = Math.max(best, score); localStorage.batBest = best; }
+    }
+  }
+  enemies = enemies.filter(e => !e.dead && Math.abs(e.x - p.x) < 1200);
+  shots = shots.filter(s => s.life > 0);
+
+  for (const q of parts){ q.x += q.vx; q.y += q.vy; q.vy += .3; q.life--; }
+  parts = parts.filter(q => q.life > 0);
+  if (flash > 0) flash--;
+  if (tick % 30 === 0) score += 1;
+}
+
+function drawBat(x, y, face){
+  ctx.save(); ctx.translate(x, y); ctx.scale(face, 1);
+  // cape
+  ctx.fillStyle = '#12151f';
+  ctx.beginPath(); ctx.moveTo(-6,-40); ctx.lineTo(-22 - (p.glide?10:0), p.glide?-30:-4); ctx.lineTo(-18,0); ctx.lineTo(-4,0); ctx.fill();
+  if (p.glide){ ctx.beginPath(); ctx.moveTo(-6,-38); ctx.lineTo(-44,-26); ctx.lineTo(-34,-18); ctx.lineTo(-22,-24); ctx.lineTo(-12,-14); ctx.fill(); }
+  // legs / body
+  ctx.fillStyle = '#2a2f40'; ctx.fillRect(-9,-18,8,18); ctx.fillRect(1,-18,8,18);
+  ctx.fillStyle = '#3a4056'; ctx.fillRect(-10,-40,20,24);
+  ctx.fillStyle = '#ffd400'; ctx.fillRect(-4,-34,8,8);          // belt emblem
+  ctx.fillStyle = '#1a1d2b'; ctx.fillRect(-10,-20,20,4);        // belt
+  // head + cowl
+  ctx.fillStyle = '#12151f'; ctx.fillRect(-8,-54,16,15);
+  ctx.beginPath(); ctx.moveTo(-8,-54); ctx.lineTo(-6,-62); ctx.lineTo(-3,-54); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(8,-54); ctx.lineTo(6,-62); ctx.lineTo(3,-54); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.fillRect(1,-50,5,3);              // eye
+  ctx.fillStyle = '#c8a27a'; ctx.fillRect(-2,-45,10,5);         // jaw
+  ctx.restore();
+}
+
+function drawEnemy(e){
+  const x = e.x - camX, y = e.y;
+  ctx.save(); ctx.translate(x, y);
+  if (e.type === 'drone'){
+    ctx.fillStyle = '#c33'; ctx.fillRect(-17,-18,34,12);
+    ctx.fillStyle = '#ff6'; ctx.fillRect(-4,-15,8,6);
+    ctx.fillStyle = '#888'; ctx.fillRect(-22,-22,44,3);
+    ctx.fillRect(-22 + (Math.floor(tick/3)%2)*10, -26, 12, 2);
+  } else {
+    const big = e.type === 'brute', s = big ? 1.4 : 1;
+    ctx.scale(s, s);
+    ctx.fillStyle = big ? '#5a2a6a' : '#6a3a2a'; ctx.fillRect(-11,-30,22,30);
+    ctx.fillStyle = '#222'; ctx.fillRect(-9,-12,7,12); ctx.fillRect(2,-12,7,12);
+    ctx.fillStyle = '#d9b38c'; ctx.fillRect(-7,-42,14,12);
+    ctx.fillStyle = big ? '#a0f' : '#444'; ctx.fillRect(-8,-44,16,5);
+    ctx.fillStyle = '#000'; ctx.fillRect(-4,-38,3,3); ctx.fillRect(2,-38,3,3);
+    if (big){ ctx.scale(1/s,1/s); ctx.fillStyle='#400'; ctx.fillRect(-20,-70,40,4); ctx.fillStyle='#f33'; ctx.fillRect(-20,-70,40*e.hp/4,4); }
+  }
+  ctx.restore();
+}
+
+function drawBg(){
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#06070f'); g.addColorStop(1,'#1a1830');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+  // moon + bat signal
+  ctx.fillStyle = '#e8e8c8'; ctx.beginPath(); ctx.arc(660,80,36,0,7); ctx.fill();
+  ctx.fillStyle = '#222'; ctx.beginPath();
+  ctx.ellipse(660,80,16,6,0,0,7); ctx.fill();
+  ctx.fillRect(644,78,32,2);
+  // skyline parallax
+  for (const layer of [0.3, 0.6]){
+    ctx.fillStyle = layer < .5 ? '#10122a' : '#171a38';
+    for (const b of buildings){
+      const bx = b.x*layer*1.6 - camX*layer + 0;
+      const x = ((bx % 4400) + 4400) % 4400 - 200;
+      const h = b.h * (layer < .5 ? .8 : 1);
+      ctx.fillRect(x, GROUND - h, b.w, h);
+      if (layer > .5){
+        ctx.fillStyle = '#ffd40055';
+        for (let wy = GROUND - h + 12; wy < GROUND - 20; wy += 24)
+          for (let wx = x + 8; wx < x + b.w - 10; wx += 18)
+            if (((wx*7 + wy*3) % 5) < 2) ctx.fillRect(wx, wy, 6, 9);
+        ctx.fillStyle = '#171a38';
+      }
+    }
+  }
+  ctx.fillStyle = '#262a3a'; ctx.fillRect(0, GROUND, W, H - GROUND);
+  ctx.fillStyle = '#ffd400'; 
+  for (let x = -((camX) % 80); x < W; x += 80) ctx.fillRect(x, GROUND + 28, 40, 4);
+}
+
+function text(t, x, y, size, color='#ffd400', align='center'){
+  ctx.fillStyle = color; ctx.font = `bold ${size}px "Courier New", monospace`; ctx.textAlign = align; ctx.fillText(t, x, y);
+}
+
+function draw(){
+  drawBg();
+  if (state === 'title'){
+    drawBat(W/2, GROUND, 1);
+    text('GOTHAM NIGHT', W/2, 130, 52);
+    text('Clear the streets of Gotham', W/2, 170, 18, '#ccc');
+    text('← → / A D move   ↑ / Space jump (hold to glide)   X / J / click: batarang', W/2, 330, 14, '#aaa');
+    text('Press SPACE or tap to start', W/2, 370, 22, '#fff');
+    if (best) text('Best: ' + best, W/2, 400, 16, '#ffd400');
+    return;
+  }
+  for (const e of enemies) drawEnemy(e);
+  ctx.save(); ctx.translate(-camX, 0);
+  if (!(p.inv > 0 && Math.floor(tick/4)%2)) drawBat(p.x, p.y, p.face);
+  ctx.fillStyle = '#ccc';
+  for (const s of shots){
+    ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot);
+    ctx.beginPath(); ctx.moveTo(-9,0); ctx.lineTo(0,-3); ctx.lineTo(9,0); ctx.lineTo(0,5); ctx.fill();
+    ctx.restore();
+  }
+  for (const q of parts){ ctx.fillStyle = q.color; ctx.fillRect(q.x, q.y, 3, 3); }
+  ctx.restore();
+
+  // HUD
+  text('SCORE ' + score, 14, 28, 20, '#ffd400', 'left');
+  text('BEST ' + Math.max(best, score), 14, 50, 14, '#aaa', 'left');
+  for (let i = 0; i < 5; i++){
+    ctx.fillStyle = i < p.hp ? '#f33' : '#401';
+    ctx.fillRect(W - 30 - i*26, 14, 20, 16);
+  }
+  if (flash) { ctx.fillStyle = 'rgba(255,0,0,.25)'; ctx.fillRect(0,0,W,H); }
+  if (state === 'over'){
+    ctx.fillStyle = 'rgba(0,0,0,.65)'; ctx.fillRect(0,0,W,H);
+    text('GAME OVER', W/2, 190, 52, '#f33');
+    text('Score: ' + score + '   Best: ' + best, W/2, 235, 22, '#fff');
+    text('Press SPACE or tap to retry', W/2, 285, 18, '#ffd400');
+  }
+}
+
+function loop(){
+  if (state === 'play') update();
+  else if (state === 'title') { if (!buildings) makeBuildings(); camX = 0; p = p || {glide:false,inv:0}; }
+  draw();
+  requestAnimationFrame(loop);
+}
+makeBuildings(); camX = 0; enemies = []; shots = []; parts = []; p = {glide:false,inv:0};
+loop();
+</script>
+</body>
+</html>
